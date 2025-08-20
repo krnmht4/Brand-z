@@ -1,62 +1,76 @@
 import streamlit as st
 import pandas as pd
 
-# Load your extended brand dataset with details and social metrics
 @st.cache_data
-def load_data():
+def load_csv_data():
     return pd.read_csv("indian_brands_comprehensive.csv")
 
-df = load_data()
+@st.cache_data
+def load_excel_data():
+    return pd.read_excel("indian_brands_phase2_with_celebrities.xlsx", sheet_name="Sheet1")
+
+# Load base brand data
+csv_df = load_csv_data()
+
+# Load detailed Excel data
+excel_df = load_excel_data()
+
+# Rename columns to standardize for merge
+excel_df = excel_df.rename(columns={"Brand Name": "Brand", "Industry/Category": "Industry"})
+
+# Merge on 'Brand' (left join to keep all brands from CSV, adding details)
+merged_df = pd.merge(csv_df, excel_df, on=["Brand", "Industry"], how="left")
 
 st.title("Brand Selection & Ad Campaign Dashboard")
 
 # Sidebar filters
 st.sidebar.header("Filters")
-industries = df["Industry"].unique().tolist()
-regions = df["Region"].unique().tolist()
+industries = merged_df["Industry"].dropna().unique().tolist()
+regions = merged_df["Region"].dropna().unique().tolist()
 
 selected_industries = st.sidebar.multiselect("Industry", industries, default=industries)
 selected_regions = st.sidebar.multiselect("Region", regions, default=regions)
 search_term = st.sidebar.text_input("Search Brand")
 
-# Filter brands based on sidebar inputs
-filtered_df = df[
-    (df["Industry"].isin(selected_industries)) &
-    (df["Region"].isin(selected_regions)) &
-    (df["Brand"].str.contains(search_term, case=False, regex=False))
+# Filter brands based on inputs
+filtered_df = merged_df[
+    (merged_df["Industry"].isin(selected_industries)) &
+    (merged_df["Region"].isin(selected_regions)) &
+    (merged_df["Brand"].str.contains(search_term, case=False, regex=False))
 ]
 
-# Show filtered brands in main area as searchable table
 st.subheader(f"Showing {len(filtered_df)} Brands")
 st.dataframe(filtered_df[["Brand", "Industry", "Region", "Website"]], use_container_width=True)
 
-# Brand selection for detail view
 brand_list = filtered_df["Brand"].tolist()
 selected_brand = st.selectbox("Select a Brand for Details", options=[""] + brand_list)
 
 if selected_brand:
-    brand_data = df[df["Brand"] == selected_brand].iloc[0]
+    brand_data = filtered_df[filtered_df["Brand"] == selected_brand].iloc[0]
 
-    # Show tabs for different brand details
-    tab1, tab2, tab3 = st.tabs(["Summary", "Social Media", "Advertising Metrics"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Summary", "Social Media", "Ad & Media Metrics", "Campaign & Celebrities"])
 
     with tab1:
         st.header(f"{selected_brand} - Summary")
         st.write("**Industry:**", brand_data["Industry"])
-        st.write("**Region:**", brand_data["Region"])
-        st.write("**Website:**", brand_data["Website"])
+        st.write("**Region:**", brand_data.get("Region", "N/A"))
+        st.write("**Website:**", brand_data.get("Website", "N/A"))
+        st.write("**Parent Company:**", brand_data.get("Parent Company", "N/A"))
 
     with tab2:
         st.header("Social Media Metrics")
         st.write("**Twitter:**", brand_data.get("Twitter", "N/A"))
         st.write("**Facebook:**", brand_data.get("Facebook", "N/A"))
         st.write("**Instagram:**", brand_data.get("Instagram", "N/A"))
-        # You can add follower counts and engagement data here if available
 
     with tab3:
         st.header("Advertising & Media Metrics")
-        st.write("You can add metrics like ad spend, impressions, reach here if you have the data.")
-        # Placeholder for your advertising campaign metrics
+        st.write("You can add metrics like ad spend, impressions, reach here if available.")
+
+    with tab4:
+        st.header("Major Campaigns and Celebrity Endorsements")
+        st.write("**Major Campaigns:**", brand_data.get("Major Campaigns (Past 5 Years)", "N/A"))
+        st.write("**Celebrity Endorsements:**", brand_data.get("Celebrity Endorsements", "N/A"))
 
 else:
     st.info("Please select a brand from the dropdown above to view detailed insights.")

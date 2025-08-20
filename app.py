@@ -2,62 +2,82 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Load CSV data
 @st.cache_data
-def load_data():
-    return pd.read_csv("brand_selection_list.csv")
+def load_csv():
+    return pd.read_csv("indian_brands_comprehensive.csv")
 
-df = load_data()
+@st.cache_data
+def load_excel():
+    return pd.read_excel("indian_brands_phase2_with_celebrities.xlsx")
 
-# Sidebar filters
+csv_df = load_csv()
+excel_df = load_excel().rename(columns={"Brand Name": "Brand", "Industry/Category": "Industry"})
+
+# Merge datasets on Brand & Industry to keep all info
+df = pd.merge(csv_df, excel_df, on=["Brand", "Industry"], how="left")
+
+st.set_page_config(page_title="Comprehensive Brand Dashboard", layout="wide")
+st.title("Comprehensive Brand Selection & Campaign Dashboard")
+
+# Sidebar Filters
 st.sidebar.header("Filters")
-industries = df["Industry"].unique().tolist()
-regions = df["Region"].unique().tolist()
+all_industries = df["Industry"].dropna().unique().tolist()
+all_regions = df["Region"].dropna().unique().tolist()
 
-selected_industries = st.sidebar.multiselect("Industry", industries, default=industries)
-selected_regions    = st.sidebar.multiselect("Region", regions, default=regions)
-search_brand        = st.sidebar.text_input("Search Brand")
+selected_industries = st.sidebar.multiselect("Industry", options=all_industries, default=all_industries)
+selected_regions = st.sidebar.multiselect("Region", options=all_regions, default=all_regions)
+search_text = st.sidebar.text_input("Search Brand")
 
-# Filter dataframe
-mask = (
-    df["Industry"].isin(selected_industries) &
-    df["Region"].isin(selected_regions) &
-    df["Brand"].str.contains(search_brand, case=False, regex=False)
-)
-filtered = df[mask]
+filtered = df[
+    (df["Industry"].isin(selected_industries)) &
+    (df["Region"].isin(selected_regions)) &
+    (df["Brand"].str.contains(search_text, case=False, regex=False))
+]
 
-# Main layout
-st.title("Brand Selection Dashboard")
-st.markdown("Filter and explore brands by Industry and Region.")
+st.markdown(f"### {len(filtered)} Brands Found")
 
-# Summary cards
-col1, col2, col3 = st.columns(3)
-col1.metric("Total Brands", len(filtered))
-col2.metric("Industries", filtered["Industry"].nunique())
-col3.metric("Regions",  filtered["Region"].nunique())
+# Brand Table
+st.dataframe(filtered[["Brand", "Industry", "Region", "Website", "Parent Company"]], use_container_width=True)
 
-# Table view
-st.subheader("Filtered Brands")
-st.dataframe(filtered.reset_index(drop=True), use_container_width=True)
+# Brand Selection
+brands_available = filtered["Brand"].unique().tolist()
+selected_brand = st.selectbox("Select a Brand to View Details", [""] + brands_available)
 
-# Bar chart: brands per industry
-st.subheader("Brands by Industry")
-fig1 = px.bar(
-    filtered.groupby("Industry").size().reset_index(name="Count"),
-    x="Industry", y="Count",
-    color="Count",
-    labels={"Count":"# Brands"},
-    title="Brands per Industry"
-)
-st.plotly_chart(fig1, use_container_width=True)
+if selected_brand:
+    brand_info = filtered[filtered["Brand"] == selected_brand].iloc[0]
 
-# Pie chart: region distribution
-st.subheader("Region Distribution")
-region_counts = filtered["Region"].value_counts().reset_index()
-region_counts.columns = ["Region", "Count"]
-fig2 = px.pie(
-    region_counts,
-    names="Region", values="Count",
-    title="Global vs India Brands"
-)
-st.plotly_chart(fig2, use_container_width=True)
+    tabs = st.tabs(["Summary", "Social Media", "Campaigns & Celebrities", "Advertising Metrics", "Visualizations"])
+
+    with tabs:
+        st.subheader(f"{selected_brand} Summary")
+        st.write(f"**Industry:** {brand_info['Industry']}")
+        st.write(f"**Region:** {brand_info.get('Region', 'N/A')}")
+        st.write(f"**Website:** {brand_info.get('Website', 'N/A')}")
+        st.write(f"**Parent Company:** {brand_info.get('Parent Company', 'N/A')}")
+
+    with tabs[1]:
+        st.subheader("Social Media Links")
+        st.write(f"Twitter: {brand_info.get('Twitter', 'N/A')}")
+        st.write(f"Facebook: {brand_info.get('Facebook', 'N/A')}")
+        st.write(f"Instagram: {brand_info.get('Instagram', 'N/A')}")
+
+    with tabs:
+        st.subheader("Major Campaigns (Past 5 Years)")
+        st.write(brand_info.get("Major Campaigns (Past 5 Years)", "N/A"))
+        st.subheader("Celebrity Endorsements")
+        st.write(brand_info.get("Celebrity Endorsements", "N/A"))
+
+    with tabs:
+        st.subheader("Advertising & Media Metrics")
+        st.write("Add campaign ad spend, impressions, reach data here if available.")
+
+    with tabs:
+        st.subheader("Interactive Visualizations")
+        # Example plot: Brand counts per region for selected industry
+        region_counts = filtered["Region"].value_counts().reset_index()
+        region_counts.columns = ["Region", "Count"]
+        fig = px.pie(region_counts, names='Region', values='Count', title='Brand Distribution by Region')
+        st.plotly_chart(fig, use_container_width=True)
+
+else:
+    st.info("Select a brand above to explore detailed information, campaigns, and analytics.")
