@@ -53,8 +53,10 @@ st.plotly_chart(fig1, use_container_width=True)
 
 # Pie chart: region distribution
 st.subheader("Region Distribution")
+region_counts = filtered["Region"].value_counts().reset_index()
+region_counts.columns = ["Region", "Count"]
 fig2 = px.pie(
-    filtered["Region"].value_counts().reset_index().rename(columns={"index":"Region","Region":"Count"}),
+    region_counts,
     names="Region", values="Count",
     title="Global vs India Brands"
 )
