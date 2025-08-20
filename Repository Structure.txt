@@ -1,0 +1,15 @@
+megalithic-brand-intel/
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── brand_selection_list.csv        # Your data
+├── .streamlit/
+│   └── secrets.toml                # API keys
+├── streamlit_app/
+│   ├── megalithic_clean.py         # Main Streamlit app
+│   ├── style.css                   # App CSS
+│   └── assets/                     # Optional images/fonts
+└── web_dashboard/                  # Optional standalone dashboard
+    ├── index.html
+    ├── app.js
+    └── style.css
