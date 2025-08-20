@@ -1,36 +1,62 @@
-Industry,Brand,Website,Twitter,Facebook,Instagram
-FMCG,Hindustan Unilever,https://www.hul.co.in,https://twitter.com/hulindia,https://www.facebook.com/hulindia,https://www.instagram.com/hul_india/
-FMCG,ITC Limited,https://www.itcportal.com,https://twitter.com/ITCLimited,https://www.facebook.com/ITCLimitedOfficial,
-FMCG,Nestlé India,https://www.nestle.in,https://twitter.com/NestleIndia,https://www.facebook.com/NestleIndia,https://www.instagram.com/nestleindia/
-FMCG,Britannia Industries,https://www.britannia.co.in,https://twitter.com/Britannia_Ind,https://www.facebook.com/BritanniaIndia,https://www.instagram.com/britanniagoodness/
-FMCG,Dabur India,https://www.dabur.com,https://twitter.com/DaburIndia,https://www.facebook.com/DaburIndia,https://www.instagram.com/daburindiaofficial/
-IT Services,Tata Consultancy Services (TCS),https://www.tcs.com,https://twitter.com/TCS,https://www.facebook.com/tcs,
-IT Services,Infosys,https://www.infosys.com,https://twitter.com/Infosys,https://www.facebook.com/infosys,
-IT Services,Wipro,https://www.wipro.com,https://twitter.com/Wipro,https://www.facebook.com/Wipro,
-IT Services,HCL Technologies,https://www.hcltech.com,https://twitter.com/hcltech,https://www.facebook.com/HCLTechnologies,
-IT Services,Tech Mahindra,https://www.techmahindra.com,https://twitter.com/tech_mahindra,https://www.facebook.com/techmahindra,
-Automotive,Maruti Suzuki,https://www.marutisuzuki.com,https://twitter.com/Maruti_Corp,https://www.facebook.com/marutisuzukiindia,https://www.instagram.com/marutisuzukiindia/
-Automotive,Tata Motors,https://www.tatamotors.com,https://twitter.com/TataMotors,https://www.facebook.com/tatamotors,https://www.instagram.com/tatamotors/
-Automotive,Mahindra & Mahindra,https://www.mahindra.com,https://twitter.com/MahindraRise,https://www.facebook.com/mahindra,https://www.instagram.com/mahindrarise/
-Automotive,Hero MotoCorp,https://www.heromotocorp.com,https://twitter.com/heromotocorp,https://www.facebook.com/heromotocorp,https://www.instagram.com/heromotocorp/
-Automotive,Bajaj Auto,https://www.bajajauto.com,https://twitter.com/BajajAutoLtd,https://www.facebook.com/BajajAutoLtd,https://www.instagram.com/bajajauto/
-Financial Services,HDFC Bank,https://www.hdfcbank.com,https://twitter.com/HDFCBank,https://www.facebook.com/HDFCBankOfficial,https://www.instagram.com/hdfcbankindia/
-Financial Services,ICICI Bank,https://www.icicibank.com,https://twitter.com/ICICIBank,https://www.facebook.com/icicibank,https://www.instagram.com/icicibank/
-Financial Services,State Bank of India,https://sbi.co.in,https://twitter.com/TheOfficialSBI,https://www.facebook.com/SBI,https://www.instagram.com/statebankofindia/
-Financial Services,Paytm,https://paytm.com,https://twitter.com/Paytm,https://www.facebook.com/paytm,https://www.instagram.com/paytm/
-Financial Services,PhonePe,https://phonepe.com,https://twitter.com/PhonePe,https://www.facebook.com/phonepe,https://www.instagram.com/phonepe/
-Healthcare,Apollo Hospitals,https://www.apollohospitals.com,https://twitter.com/ApolloHospitals,https://www.facebook.com/ApolloHospitals,https://www.instagram.com/apollohospitals/
-Healthcare,Fortis Healthcare,https://www.fortishealthcare.com,https://twitter.com/FortisHealth,https://www.facebook.com/FortisHealthcare,
-Healthcare,Dr. Reddy’s Laboratories,https://www.drreddys.com,https://twitter.com/DrReddysLabs,https://www.facebook.com/DrReddysLabs,
-Telecom,Jio,https://www.jio.com,https://twitter.com/Jio,https://www.facebook.com/Jio,https://www.instagram.com/jio/
-Telecom,Airtel,https://www.airtel.in,https://twitter.com/Airtel_Presence,https://www.facebook.com/Airtel,https://www.instagram.com/airtelindia/
-Telecom,Vodafone Idea,https://www.myvi.in,https://twitter.com/vodafoneidea,https://www.facebook.com/vodafoneidea,https://www.instagram.com/vodafoneidea/
-Retail,Flipkart,https://www.flipkart.com,https://twitter.com/Flipkart,https://www.facebook.com/flipkart,https://www.instagram.com/flipkart/
-Retail,Amazon India,https://www.amazon.in,https://twitter.com/AmazonIN,https://www.facebook.com/AmazonIndia,https://www.instagram.com/amazonindiaofficial/
-Retail,Myntra,https://www.myntra.com,https://twitter.com/Myntra,https://www.facebook.com/myntra,https://www.instagram.com/myntra/
-Media,Zee5,https://www.zee5.com,https://twitter.com/zee5,https://www.facebook.com/zee5,https://www.instagram.com/zee5/
-Media,Hotstar,https://www.hotstar.com,,https://www.facebook.com/HotstarOfficial,
-Media,Sony LIV,https://www.sonyliv.com,https://twitter.com/sonyliv,https://www.facebook.com/SonyLIV,https://www.instagram.com/sonyliv/
-Manufacturing,Tata Steel,https://www.tatasteel.com,https://twitter.com/TataSteel,https://www.facebook.com/tatasteel,
-Manufacturing,Reliance Industries,https://www.ril.com,https://twitter.com/ril,https://www.facebook.com/RelianceIndustriesLimited,https://www.instagram.com/relianceindustries/
-Manufacturing,Asian Paints,https://www.asianpaints.com,https://twitter.com/asianpaints,https://www.facebook.com/AsianPaintsOfficial,https://www.instagram.com/asianpaintsindia/
+import streamlit as st
+import pandas as pd
+
+# Load your extended brand dataset with details and social metrics
+@st.cache_data
+def load_data():
+    return pd.read_csv("indian_brands_comprehensive.csv")
+
+df = load_data()
+
+st.title("Brand Selection & Ad Campaign Dashboard")
+
+# Sidebar filters
+st.sidebar.header("Filters")
+industries = df["Industry"].unique().tolist()
+regions = df["Region"].unique().tolist()
+
+selected_industries = st.sidebar.multiselect("Industry", industries, default=industries)
+selected_regions = st.sidebar.multiselect("Region", regions, default=regions)
+search_term = st.sidebar.text_input("Search Brand")
+
+# Filter brands based on sidebar inputs
+filtered_df = df[
+    (df["Industry"].isin(selected_industries)) &
+    (df["Region"].isin(selected_regions)) &
+    (df["Brand"].str.contains(search_term, case=False, regex=False))
+]
+
+# Show filtered brands in main area as searchable table
+st.subheader(f"Showing {len(filtered_df)} Brands")
+st.dataframe(filtered_df[["Brand", "Industry", "Region", "Website"]], use_container_width=True)
+
+# Brand selection for detail view
+brand_list = filtered_df["Brand"].tolist()
+selected_brand = st.selectbox("Select a Brand for Details", options=[""] + brand_list)
+
+if selected_brand:
+    brand_data = df[df["Brand"] == selected_brand].iloc[0]
+
+    # Show tabs for different brand details
+    tab1, tab2, tab3 = st.tabs(["Summary", "Social Media", "Advertising Metrics"])
+
+    with tab1:
+        st.header(f"{selected_brand} - Summary")
+        st.write("**Industry:**", brand_data["Industry"])
+        st.write("**Region:**", brand_data["Region"])
+        st.write("**Website:**", brand_data["Website"])
+
+    with tab2:
+        st.header("Social Media Metrics")
+        st.write("**Twitter:**", brand_data.get("Twitter", "N/A"))
+        st.write("**Facebook:**", brand_data.get("Facebook", "N/A"))
+        st.write("**Instagram:**", brand_data.get("Instagram", "N/A"))
+        # You can add follower counts and engagement data here if available
+
+    with tab3:
+        st.header("Advertising & Media Metrics")
+        st.write("You can add metrics like ad spend, impressions, reach here if you have the data.")
+        # Placeholder for your advertising campaign metrics
+
+else:
+    st.info("Please select a brand from the dropdown above to view detailed insights.")
